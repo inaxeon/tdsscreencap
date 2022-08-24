@@ -41,7 +41,8 @@ namespace TDSScreenCap
                 _session = GlobalResourceManager.Open(_device) as IMessageBasedSession;
                 _session.TimeoutMilliseconds = 5000;
                 _session.TerminationCharacterEnabled = false;
-                _session.RawIO.Write("*RST\n");
+
+                WriteDevice("*RST\n");
             }
             else
             {
@@ -165,7 +166,7 @@ namespace TDSScreenCap
             }
             else if (_interfaceType == InterfaceType.Gpib)
             {
-                return _session.RawIO.Read(0x100000); // Arbitrary large number to force it to read everything
+                return ReadDevice(0x100000); // Arbitrary large number to force it to read everything
             }
             else
             {
