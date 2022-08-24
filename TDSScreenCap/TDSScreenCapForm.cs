@@ -213,6 +213,8 @@ namespace TDSScreenCap
                 _instrument.CloseDevice();
                 _instrument = null;
             }
+
+            btnCapture.Focus();
         }
 
         private void btnSaveAs_Click(object sender, EventArgs e)
