@@ -19,16 +19,36 @@ namespace TDSScreenCap
         private InstrumentAccess _instrument;
         private Thread _workerThread;
         private byte[] _pngFile;
+        private bool _waiting;
+        private readonly string _designTitle;
 
 
         public TDSScreenCapForm()
         {
             InitializeComponent();
+            _designTitle = Text;
         }
 
         private void TDSScreenCapForm_Load(object sender, EventArgs e)
         {
+            UpdateConfigDisplay();
+        }
 
+        private void UpdateConfigDisplay()
+        {
+            switch ((InterfaceType)Properties.Settings.Default.InterfaceType)
+            {
+                case InterfaceType.Rs232:
+                    Text = _designTitle + $" [RS232: {Properties.Settings.Default.ComPort}]";
+                    break;
+                case InterfaceType.Gpib:
+                    Text = _designTitle + $" [GPIB: {Properties.Settings.Default.GpibDevice}]";
+                    break;
+                default:
+                    throw new NotImplementedException();
+            }
+
+            btnWait.Enabled = (InterfaceType)Properties.Settings.Default.InterfaceType == InterfaceType.Rs232;
         }
 
         private void Connect()
@@ -59,13 +79,16 @@ namespace TDSScreenCap
 
         private void StartRead()
         {
-            btnCapture.Enabled = false;
-            btnWait.Enabled = false;
-            btnOptions.Enabled = false;
-
             _workerThread = new Thread(() =>
             {
-                _pngFile = _instrument.ReadPng();
+                try
+                {
+                    _pngFile = _instrument.ReadPng();
+                }
+                catch (Exception ex)
+                {
+
+                }
                 EndCapture();
             });
 
@@ -75,24 +98,76 @@ namespace TDSScreenCap
         private void btnCapture_Click(object sender, EventArgs e)
         {
             Connect();
-            SetupCapture();
 
-            _instrument.WriteDevice("HARDCOPY START");
+            if (_instrument == null)
+                return;
+
+            _instrument.SetTimeout(5000);
+
+            try
+            {
+                SetupCapture();
+
+                _instrument.WriteDevice("HARDCOPY START\n");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Failed to write to instrument. Is hardware flow control correctly wired?", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                EndCapture();
+                return;
+            }
 
             StartRead();
         }
 
         private void btnWait_Click(object sender, EventArgs e)
         {
-            Connect();
-            SetupCapture();
-            StartRead();
+            if (_waiting)
+            {
+                _instrument.CloseDevice();
+                _instrument = null;
+            }
+            else
+            {
+                Connect();
+
+                if (_instrument == null)
+                    return;
+
+                _instrument.SetTimeout(-1); //Infinite
+
+                _waiting = true;
+
+                try
+                {
+                    SetupCapture();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Failed to write to instrument. Is hardware flow control correctly wired?", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    _waiting = false;
+                    EndCapture();
+                    return;
+                }
+
+                StartRead();
+            }
         }
 
         private void SetupCapture()
         {
+            btnCapture.Enabled = false;
+
+            if (_waiting)
+                btnWait.Text = "Abort";
+            else
+                btnWait.Enabled = false;
+
+            btnOptions.Enabled = false;
+
             btnSaveAs.Enabled = false;
             picScreenShot.Image = null;
+            _pngFile = null;
 
             _instrument.WriteDevice(string.Format(":HARDCOPY:FORMAT PNG;PALETTE NORMAL;PORT {0};LAYOUT PORTRAIT;PREVIEW 0;INKSAVER 0;COMPRESSION 0\n\n",
                 (InterfaceType)Properties.Settings.Default.InterfaceType == InterfaceType.Rs232 ? "RS232" : "GPIB"));
@@ -106,19 +181,37 @@ namespace TDSScreenCap
                 return;
             }
 
-            btnWait.Enabled = true;
+            if (_pngFile != null)
+            {
+                try
+                {
+                    var img = Image.FromStream(new MemoryStream(_pngFile));
+                    picScreenShot.Image = img;
+                    btnSaveAs.Enabled = true;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Invalid image received!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+
             btnCapture.Enabled = true;
             btnOptions.Enabled = true;
 
-            try
+            if (_waiting)
             {
-                var img = Image.FromStream(new MemoryStream(_pngFile));
-                picScreenShot.Image = img;
-                btnSaveAs.Enabled = true;
+                _waiting = false;
+                btnWait.Text = "Wait for print button press";
             }
-            catch (Exception ex)
+            else
             {
-                MessageBox.Show("No valid image received!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                btnWait.Enabled = (InterfaceType)Properties.Settings.Default.InterfaceType == InterfaceType.Rs232;
+            }
+
+            if (_instrument != null)
+            {
+                _instrument.CloseDevice();
+                _instrument = null;
             }
         }
 
@@ -145,6 +238,7 @@ namespace TDSScreenCap
         {
             var settings = new SettingsForm();
             settings.ShowDialog();
+            UpdateConfigDisplay();
         }
     }
 }

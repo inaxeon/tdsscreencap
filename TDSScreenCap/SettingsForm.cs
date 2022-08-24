@@ -17,8 +17,6 @@ namespace TDSScreenCap
 
         public SettingsForm()
         {
-            _manager = new ResourceManager();
-
             InitializeComponent();
         }
 
@@ -31,9 +29,18 @@ namespace TDSScreenCap
 
         private void SettingsForm_Load(object sender, EventArgs e)
         {
-            var devices = _manager.Find("(ASRL|GPIB|TCPIP|USB)?*");
-
-            ddlGpibDevices.Items.AddRange(devices.Cast<object>().ToArray());
+            try
+            {
+                _manager = new ResourceManager();
+                var devices = _manager.Find("(ASRL|GPIB|TCPIP|USB)?*");
+                ddlGpibDevices.Items.AddRange(devices.Cast<object>().ToArray());
+            }
+            catch (Exception ex)
+            {
+                btnGpib.Enabled = false;
+                grpGpibSettings.Text += " (NI-VISA load failed)";
+                btnGpib.Checked = false;
+            }
 
             if (!string.IsNullOrEmpty(Properties.Settings.Default.GpibDevice))
                 ddlGpibDevices.SelectedItem = Properties.Settings.Default.GpibDevice;

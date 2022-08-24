@@ -16,7 +16,6 @@ namespace TDSScreenCap
         private IMessageBasedSession _session;
         private SerialPort _serialPort;
 
-
         public InstrumentAccess(InterfaceType interfaceType, string device)
         {
             _interfaceType = interfaceType;
@@ -27,11 +26,13 @@ namespace TDSScreenCap
         {
             if (_interfaceType == InterfaceType.Rs232)
             {
+                _serialPort = new SerialPort();
                 _serialPort.PortName = _device;
                 _serialPort.BaudRate = 38400;
                 _serialPort.DataBits = 8;
                 _serialPort.Handshake = Handshake.RequestToSend;
                 _serialPort.Parity = Parity.None;
+                _serialPort.WriteTimeout = 3000;
 
                 _serialPort.Open();
             }
@@ -110,37 +111,61 @@ namespace TDSScreenCap
             }
         }
 
+        public void SetTimeout(int ms)
+        {
+            if (_interfaceType == InterfaceType.Rs232)
+            {
+                _serialPort.ReadTimeout = ms;
+            }
+            else if (_interfaceType == InterfaceType.Gpib)
+            {
+                // Not needed as "button press" mode not yet working
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
+        }
+
         public byte[] ReadPng()
         {
             if (_interfaceType == InterfaceType.Rs232)
             {
+                // No way to know when the data is all sent with RS-232, so read in PNG intelligently so we know when it's all in
                 List<byte> ret = new List<byte>();
                 var data = ReadDevice(8); // Header
                 ret.AddRange(data);
-                int remaining = 6;
-                var parts = new List<uint>();
 
-                while (remaining-- > 0)
+                for (;;)
                 {
-                    var lengthAndType = ReadDevice(8);
+                    var lengthAndType = ReadDevice(8); // Length+CRC
                     ret.AddRange(lengthAndType);
+
                     var lengthBytes = lengthAndType.Take(4).ToArray();
+
                     if (BitConverter.IsLittleEndian)
                         Array.Reverse(lengthBytes);
+
                     var typeBytes = lengthAndType.Skip(4).Take(4).ToArray();
+
                     if (BitConverter.IsLittleEndian)
                         Array.Reverse(typeBytes);
+
                     var length = BitConverter.ToUInt32(lengthBytes, 0);
-                    parts.Add(BitConverter.ToUInt32(typeBytes, 0));
 
                     ret.AddRange(ReadDevice((int)length + 4)); // Data+CRC
+
+                    var type = BitConverter.ToUInt32(typeBytes, 0);
+
+                    if (type == 0x49454E44) // End
+                        break;
                 }
 
                 return ret.ToArray();
             }
             else if (_interfaceType == InterfaceType.Gpib)
             {
-                return _session.RawIO.Read(524288);
+                return _session.RawIO.Read(0x100000); // Arbitrary large number to force it to read everything
             }
             else
             {
