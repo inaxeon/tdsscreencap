@@ -14,6 +14,7 @@ namespace TDSScreenCap
     public partial class SettingsForm : Form
     {
         ResourceManager _manager;
+        private InterfaceType _uiInterfaceType;
 
         public SettingsForm()
         {
@@ -22,6 +23,7 @@ namespace TDSScreenCap
 
         private void btnOK_Click(object sender, EventArgs e)
         {
+            Properties.Settings.Default.InterfaceType = (int)_uiInterfaceType;
             Properties.Settings.Default.GpibDevice = (string)ddlGpibDevices.SelectedItem;
             Properties.Settings.Default.ComPort = (string)ddlRs232Port.SelectedItem;
             Properties.Settings.Default.Save();
@@ -52,7 +54,9 @@ namespace TDSScreenCap
             if (!string.IsNullOrEmpty(_lastComPort))
                 ddlRs232Port.SelectedItem = _lastComPort;
 
-            switch ((InterfaceType)Properties.Settings.Default.InterfaceType)
+            _uiInterfaceType = (InterfaceType)Properties.Settings.Default.InterfaceType;
+
+            switch (_uiInterfaceType)
             {
                 case InterfaceType.Rs232:
                     btnRs232.Checked = true;
@@ -70,9 +74,7 @@ namespace TDSScreenCap
         private void btnRs232_CheckedChanged(object sender, EventArgs e)
         {
             if (btnRs232.Checked)
-            {
-                Properties.Settings.Default.InterfaceType = (int)InterfaceType.Rs232;
-            }
+                _uiInterfaceType = InterfaceType.Rs232;
 
             UpdateUi();
         }
@@ -80,16 +82,14 @@ namespace TDSScreenCap
         private void btnGpib_CheckedChanged(object sender, EventArgs e)
         {
             if (btnGpib.Checked)
-            {
-                Properties.Settings.Default.InterfaceType = (int)InterfaceType.Gpib;
-            }
+                _uiInterfaceType = InterfaceType.Gpib;
 
             UpdateUi();
         }
 
         private void UpdateUi()
         {
-            switch ((InterfaceType)Properties.Settings.Default.InterfaceType)
+            switch (_uiInterfaceType)
             {
                 case InterfaceType.Rs232:
                     grpRs232.Enabled = true;

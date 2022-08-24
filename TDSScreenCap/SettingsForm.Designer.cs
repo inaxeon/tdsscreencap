@@ -38,8 +38,8 @@
             this.label1 = new System.Windows.Forms.Label();
             this.ddlGpibDevices = new System.Windows.Forms.ComboBox();
             this.btnOK = new System.Windows.Forms.Button();
-            this.btnCancel = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
+            this.btnCancel = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.grpRs232.SuspendLayout();
             this.grpGpibSettings.SuspendLayout();
@@ -152,6 +152,15 @@
             this.btnOK.UseVisualStyleBackColor = true;
             this.btnOK.Click += new System.EventHandler(this.btnOK_Click);
             // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(205, 35);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(161, 13);
+            this.label3.TabIndex = 2;
+            this.label3.Text = "Instrument: 3800 Baud, Hard, LF";
+            // 
             // btnCancel
             // 
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
@@ -161,15 +170,6 @@
             this.btnCancel.TabIndex = 4;
             this.btnCancel.Text = "Cancel";
             this.btnCancel.UseVisualStyleBackColor = true;
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(205, 35);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(161, 13);
-            this.label3.TabIndex = 2;
-            this.label3.Text = "Instrument: 3800 Baud, Hard, LF";
             // 
             // SettingsForm
             // 
@@ -208,11 +208,11 @@
         private System.Windows.Forms.GroupBox grpRs232;
         private System.Windows.Forms.GroupBox grpGpibSettings;
         private System.Windows.Forms.Button btnOK;
-        private System.Windows.Forms.Button btnCancel;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.ComboBox ddlGpibDevices;
         private System.Windows.Forms.ComboBox ddlRs232Port;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Button btnCancel;
     }
 }
