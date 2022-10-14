@@ -41,8 +41,6 @@ namespace TDSScreenCap
                 _session = GlobalResourceManager.Open(_device) as IMessageBasedSession;
                 _session.TimeoutMilliseconds = 5000;
                 _session.TerminationCharacterEnabled = false;
-
-                WriteDevice("*RST\n");
             }
             else
             {

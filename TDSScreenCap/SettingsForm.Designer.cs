@@ -32,13 +32,13 @@
             this.btnGpib = new System.Windows.Forms.RadioButton();
             this.btnRs232 = new System.Windows.Forms.RadioButton();
             this.grpRs232 = new System.Windows.Forms.GroupBox();
+            this.label3 = new System.Windows.Forms.Label();
             this.ddlRs232Port = new System.Windows.Forms.ComboBox();
             this.label2 = new System.Windows.Forms.Label();
             this.grpGpibSettings = new System.Windows.Forms.GroupBox();
             this.label1 = new System.Windows.Forms.Label();
             this.ddlGpibDevices = new System.Windows.Forms.ComboBox();
             this.btnOK = new System.Windows.Forms.Button();
-            this.label3 = new System.Windows.Forms.Label();
             this.btnCancel = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.grpRs232.SuspendLayout();
@@ -93,13 +93,22 @@
             this.grpRs232.TabStop = false;
             this.grpRs232.Text = "RS-232 Settings";
             // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(195, 35);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(167, 13);
+            this.label3.TabIndex = 2;
+            this.label3.Text = "Instrument: 38400 Baud, Hard, LF";
+            // 
             // ddlRs232Port
             // 
             this.ddlRs232Port.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.ddlRs232Port.FormattingEnabled = true;
             this.ddlRs232Port.Location = new System.Drawing.Point(52, 31);
             this.ddlRs232Port.Name = "ddlRs232Port";
-            this.ddlRs232Port.Size = new System.Drawing.Size(147, 21);
+            this.ddlRs232Port.Size = new System.Drawing.Size(134, 21);
             this.ddlRs232Port.TabIndex = 2;
             // 
             // label2
@@ -151,15 +160,6 @@
             this.btnOK.Text = "OK";
             this.btnOK.UseVisualStyleBackColor = true;
             this.btnOK.Click += new System.EventHandler(this.btnOK_Click);
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(205, 35);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(161, 13);
-            this.label3.TabIndex = 2;
-            this.label3.Text = "Instrument: 3800 Baud, Hard, LF";
             // 
             // btnCancel
             // 
