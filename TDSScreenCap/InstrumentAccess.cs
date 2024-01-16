@@ -39,7 +39,7 @@ namespace TDSScreenCap
             else if (_interfaceType == InterfaceType.Gpib)
             {
                 _session = GlobalResourceManager.Open(_device) as IMessageBasedSession;
-                _session.TimeoutMilliseconds = 5000;
+                _session.TimeoutMilliseconds = 10000;
                 _session.TerminationCharacterEnabled = false;
             }
             else
